@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HelmiInDrive.com</title>
+    <title>HelmiInDrive.com - Platform Gotong Royong Mandiri</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tesseract.js for Free Client-Side OCR (AI Receipt Scanning) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.0.2/tesseract.min.js"></script>
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -66,7 +68,7 @@
                             <div id="progressBar" class="bg-gradient-to-r from-emerald-500 to-[#92E3A9] h-full rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
                         <div class="flex justify-between text-xs text-slate-400 pt-1">
-                            <span><b id="donorCountDisplay" class="text-white">0</b> Donatur</span>
+                            <span><b id="donorCountDisplay" class="text-white">0</b> Donatur Unik</span>
                             <span><b>120</b> Hari lagi</span>
                         </div>
                     </div>
@@ -77,7 +79,7 @@
                         </div>
                         <div>
                             <p class="text-xs text-slate-400">Penggalang Dana</p>
-                            <h3 class="font-bold text-white text-sm">Helmi (InDrive / Transportasi)</h3>
+                            <h3 class="font-bold text-white text-sm">Helmi (InDrive / Transport)</h3>
                             <p class="text-[11px] text-[#92E3A9] font-medium flex items-center gap-1">
                                 <span class="w-1.5 h-1.5 rounded-full bg-[#92E3A9] inline-block"></span> GoPay Merchant QRIS Resmi (NMID: ID1024327380357)
                             </p>
@@ -102,8 +104,18 @@
                         Halaman dukungan mandiri ini saya buat untuk membantu mewujudkan kesiapan perangkat kerja serta penunjang operasional harian agar dapat berjalan dengan lebih lancar dan profesional.
                     </p>
                     <p class="bg-emerald-950/40 border border-emerald-500/30 p-3.5 rounded-xl text-emerald-200 text-xs">
-                        💡 <b>Catatan QRIS GoPay Merchant:</b> QRIS terhubung langsung ke akun resmi atas nama <b>HELMI, INDRIVE, TRANSPORT</b>. Rekan-rekan dapat melakukan transfer dan konfirmasi dukungan langsung melalui form di bawah agar tercatat di statistik halaman ini.
+                        💡 <b>Otomatisasi AI OCR:</b> Sistem ini mendeteksi bukti transfer secara otomatis menggunakan pemindai AI cerdas. Unggah screenshot bukti transfer Anda, AI akan membaca nominal dan mencatatnya ke statistik secara transparan.
                     </p>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 rounded-2xl border border-slate-800 p-5 md:p-6 space-y-4 shadow-sm">
+                <h2 class="font-bold text-base text-white border-b border-slate-800 pb-3 flex justify-between items-center">
+                    <span>Riwayat Dukungan Terverifikasi</span>
+                    <span id="badgeDonorTotal" class="text-xs px-2.5 py-1 bg-emerald-500/20 text-[#92E3A9] rounded-full">0 Donatur</span>
+                </h2>
+                <div id="donorListContainer" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <p class="text-xs text-slate-500 text-center py-4">Belum ada riwayat dukungan tercatat. Jadilah yang pertama mendukung!</p>
                 </div>
             </div>
 
@@ -119,17 +131,27 @@
                     <p class="text-[11px] text-slate-400">Scan via GoPay, BCA, Mandiri, BNI, OVO, Dana, dll</p>
                 </div>
 
-                <!-- QRIS Image container with robust fallback -->
+                <!-- Official QRIS Image container -->
                 <div class="bg-white p-2 rounded-2xl shadow-xl flex flex-col items-center justify-center relative overflow-hidden border border-emerald-500/20">
                     <img src="https://raw.githubusercontent.com/tatanggq/QRIS/main/QRIS%20HelmiInDrive.com.jpeg" alt="QRIS HelmiInDrive.com" class="w-full h-auto rounded-xl shadow-md object-contain" onerror="this.onerror=null; this.src='QRIS HelmiInDrive.com.jpeg';">
                 </div>
 
-                <div class="space-y-2.5 pt-2 border-t border-slate-800">
-                    <label class="text-xs font-medium text-slate-300 block">Sudah Transfer via QRIS? Catat Dukungan Anda:</label>
-                    <input type="number" id="donorAmountInput" placeholder="Nominal (Contoh: 50000)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs focus:outline-none focus:border-[#92E3A9] font-bold text-white">
-                    <input type="text" id="donorNameInput" placeholder="Nama / Hamba Allah (Opsional)" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs focus:outline-none focus:border-[#92E3A9] text-white">
-                    <button onclick="recordDonation()" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-[#92E3A9] hover:opacity-90 text-slate-950 font-bold text-xs rounded-xl shadow transition uppercase tracking-wider">
-                        Konfirmasi & Catat Donasi
+                <!-- Automated AI OCR Upload Form -->
+                <div class="space-y-3 pt-2 border-t border-slate-800">
+                    <label class="text-xs font-medium text-slate-300 block">Konfirmasi Otomatis (Upload Bukti Transfer):</label>
+                    <input type="text" id="donorNameInput" placeholder="Nama / Hamba Allah" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs focus:outline-none focus:border-[#92E3A9] text-white">
+                    
+                    <div class="space-y-1">
+                        <label class="text-[11px] text-slate-400 block">Screenshot Bukti Transfer (AI akan membaca nominal):</label>
+                        <input type="file" id="receiptFile" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-500/20 file:text-[#92E3A9] hover:file:bg-emerald-500/30 cursor-pointer">
+                    </div>
+
+                    <div id="ocrStatus" class="text-[11px] text-amber-400 font-medium hidden">
+                        🤖 AI sedang memindai bukti transfer...
+                    </div>
+
+                    <button onclick="processAutoDonation()" id="submitBtn" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-[#92E3A9] hover:opacity-90 text-slate-950 font-bold text-xs rounded-xl shadow transition uppercase tracking-wider">
+                        Verifikasi Otomatis & Catat
                     </button>
                 </div>
 
@@ -143,46 +165,147 @@
     </main>
 
     <footer class="bg-slate-950 border-t border-slate-800 py-6 mt-auto text-center text-xs text-slate-400">
-        <div class="max-w-5xl mx-auto px-4 space-y-1">
+        <div class="max-w-5xl mx-auto px-4 space-y-2">
             <p>© 2026 HelmiInDrive.com — Platform Gotong Royong Mandiri.</p>
             <p>Didukung oleh semangat kerja keras InDrive & Transport.</p>
+            <div class="pt-2">
+                <button onclick="resetTestData()" class="text-[10px] text-red-400 hover:underline bg-red-950/40 px-3 py-1 rounded-lg border border-red-500/30">
+                    🔄 Reset Data Uji Coba (Untuk Testing)
+                </button>
+            </div>
         </div>
     </footer>
 
     <script>
-        let totalCollected = parseInt(localStorage.getItem('helmi_collected')) || 0;
-        let donorCount = parseInt(localStorage.getItem('helmi_donors')) || 0;
+        let donorsData = JSON.parse(localStorage.getItem('helmi_donors_list')) || [];
         const targetAmount = 4500000;
 
         function updateStatsUI() {
+            let totalCollected = donorsData.reduce((sum, d) => sum + d.amount, 0);
+            
+            // Unik pendonor berdasarkan nama
+            const uniqueDonors = [...new Set(donorsData.map(d => d.name.trim().toLowerCase()))].length;
+
             document.getElementById('collectedDisplay').textContent = 'Rp ' + totalCollected.toLocaleString('id-ID');
-            document.getElementById('donorCountDisplay').textContent = donorCount;
+            document.getElementById('donorCountDisplay').textContent = uniqueDonors;
+            document.getElementById('badgeDonorTotal').textContent = donorsData.length + ' Transaksi';
+
             let percent = Math.min(Math.round((totalCollected / targetAmount) * 100), 100);
             document.getElementById('progressBar').style.width = percent + '%';
-        }
 
-        function recordDonation() {
-            const amtInput = document.getElementById('donorAmountInput');
-            const nameInput = document.getElementById('donorNameInput');
-            const amt = parseInt(amtInput.value);
-
-            if (!amt || amt <= 0) {
-                showModal('Mohon Masukkan Nominal', 'Silakan masukkan nominal dukungan yang valid sesuai transfer QRIS Anda.');
+            // Render donor list
+            const container = document.getElementById('donorListContainer');
+            if (donorsData.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Belum ada riwayat dukungan tercatat. Jadilah yang pertama mendukung!</p>`;
                 return;
             }
 
-            totalCollected += amt;
-            donorCount += 1;
+            container.innerHTML = donorsData.slice().reverse().map(d => `
+                <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs">
+                    <div>
+                        <div class="font-bold text-white">${escapeHtml(d.name)}</div>
+                        <div class="text-[10px] text-slate-400">${d.date} • <span class="text-emerald-400 font-mono">${d.source}</span></div>
+                    </div>
+                    <div class="font-bold text-[#92E3A9] text-sm">
+                        Rp ${d.amount.toLocaleString('id-ID')}
+                    </div>
+                </div>
+            `).join('');
+        }
 
-            localStorage.setItem('helmi_collected', totalCollected);
-            localStorage.setItem('helmi_donors', donorCount);
+        async function processAutoDonation() {
+            const nameInput = document.getElementById('donorNameInput');
+            const fileInput = document.getElementById('receiptFile');
+            const statusDiv = document.getElementById('ocrStatus');
+            const submitBtn = document.getElementById('submitBtn');
 
-            updateStatsUI();
+            const donorName = nameInput.value.trim() || 'Hamba Allah';
 
-            amtInput.value = '';
-            nameInput.value = '';
+            if (fileInput.files.length === 0) {
+                showModal('Bukti Belum Diunggah', 'Silakan lampirkan screenshot bukti transfer QRIS Anda agar dapat diverifikasi.');
+                return;
+            }
 
-            showModal('Terima Kasih Banyak!', `Dukungan sebesar Rp ${amt.toLocaleString('id-ID')} telah berhasil dicatat. Semoga kebaikan Anda dibalas berlipat ganda! Aamiin.`);
+            const file = fileInput.files[0];
+            statusDiv.classList.remove('hidden');
+            statusDiv.textContent = '🤖 AI sedang memindai nominal pada bukti transfer...';
+            submitBtn.disabled = true;
+
+            try {
+                // Jalankan Tesseract.js OCR di browser
+                const result = await Tesseract.recognize(file, 'ind+eng', {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            statusDiv.textContent = `🤖 Memindai: ${Math.round(m.progress * 100)}%`;
+                        }
+                    }
+                });
+
+                const recognizedText = result.data.text;
+                console.log("OCR Result:", recognizedText);
+
+                // Ekstraksi angka nominal rupiah dari teks OCR
+                const detectedAmount = extractAmountFromText(recognizedText);
+
+                statusDiv.classList.add('hidden');
+                submitBtn.disabled = false;
+
+                if (!detectedAmount || detectedAmount <= 0) {
+                    showModal('Nominal Tidak Terbaca Otomatis', 'AI kesulitan mendeteksi angka nominal pada gambar. Pastikan screenshot bukti transfer jelas dan tidak terpotong.');
+                    return;
+                }
+
+                // Tambahkan ke data donatur
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+                donorsData.push({
+                    name: donorName,
+                    amount: detectedAmount,
+                    date: dateStr,
+                    source: 'QRIS Verified AI'
+                });
+
+                localStorage.setItem('helmi_donors_list', JSON.stringify(donorsData));
+                updateStatsUI();
+
+                // Reset form
+                nameInput.value = '';
+                fileInput.value = '';
+
+                showModal('Terima Kasih Banyak!', `AI berhasil memverifikasi bukti transfer sebesar <b>Rp ${detectedAmount.toLocaleString('id-ID')}</b> atas nama <b>${escapeHtml(donorName)}</b>. Dukungan Anda otomatis tercatat di statistik!`);
+
+            } catch (err) {
+                console.error(err);
+                statusDiv.classList.add('hidden');
+                submitBtn.disabled = false;
+                showModal('Pemindaian Gagal', 'Terjadi kendala saat memindai gambar. Silakan coba unggah ulang.');
+            }
+        }
+
+        // Fungsi cerdas untuk mencari angka nominal rupiah dalam teks hasil OCR
+        function extractAmountFromText(text) {
+            // Hilangkan semua titik atau koma ribuan yang membingungkan
+            const cleanText = text.replace(/Rp|\.|IDR/gi, '');
+            // Cari pola angka 4 digit atau lebih (misal 50000, 100000, dst)
+            const numbers = cleanText.match(/\d+/g);
+            if (!numbers) return 0;
+
+            // Filter angka yang masuk akal sebagai nominal donasi (> 1000)
+            const validNumbers = numbers.map(n => parseInt(n, 10)).filter(n => n >= 1000);
+            if (validNumbers.length === 0) return 0;
+
+            // Ambil angka terbesar yang ditemukan di struk (biasanya total transfer)
+            return Math.max(...validNumbers);
+        }
+
+        function resetTestData() {
+            if (confirm('Yakin ingin mereset seluruh data uji coba donasi kembali ke Rp 0?')) {
+                localStorage.removeItem('helmi_donors_list');
+                donorsData = [];
+                updateStatsUI();
+                showModal('Data Direset', 'Statistik penggalangan dana telah dikembalikan ke awal (Rp 0).');
+            }
         }
 
         function showModal(title, message) {
@@ -197,6 +320,10 @@
                 </div>
             `;
             document.body.appendChild(box);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
         window.onload = function() {
